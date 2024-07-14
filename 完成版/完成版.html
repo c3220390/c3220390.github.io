@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>西濃かるた</title>
+    <style>
+        .header{
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100px;
+        }
+        .header img {
+            max-width: 100%;
+            height: auto;
+        }
+        body {
+            background-color: #ede8db;
+            font-family: Arial, sans-serif;
+        }
+
+        .map-container {
+            position: relative;
+        }
+
+        .map {
+            width: 80%;
+            margin: auto;
+            display: block;
+            height: auto;
+        }
+
+        .map-button {
+            position: absolute;
+            padding: 10px;
+            width: 20px;
+            height: 20px;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transform: translate(-50%,-50%);
+            text-decoration: none;
+            transition: background-color 0.3s, transform 0.3s;
+            
+        }
+
+        .map-button1 {
+            background-color: #FF77A9;
+
+        }
+
+        .map-button2 {
+            background-color: #3498db;
+        }
+
+        .map-button3 {
+            background-color: #8BC34A;
+        }
+
+        .map-button:hover {
+            transform: translate(-50%, -50%) scale(1.1);
+        }
+
+        .popup {
+            display: none;
+            position: absolute;
+            background-color: white;
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-top: -12em;
+            margin-left: -0.5em;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            z-index: 10;
+            white-space: normal; 
+            max-width: 200px; 
+            transform: translateX(-50%);
+            background: #545454;
+            font-size: 0.9rem;
+            font-weight: 600;
+            line-height: 1.8;
+            animation: fadeIn 0.6s;
+            color: #FFF;
+            border-radius: 3px;
+            filter: drop-shadow(0px 1px 4px #aaa);
+        }
+        .popup::after {
+            content: "";
+            position: absolute;
+            border-width: 10px;
+            border-style: solid;
+            border-color: white transparent transparent transparent; /* 上向きの三角形 */
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .popup::before {
+            content: "";
+            position: absolute;
+            border-width: 11px;
+            border-style: solid;
+            border-color: #ccc transparent transparent transparent; /* 上向きの三角形 */
+            top: calc(100% + 1px); /* ボーダーの厚さに応じて調整 */
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        /* スマホ */
+        @media screen and (max-width: 550px) {
+            body {
+                background-color: #ede8db;
+            }
+
+            .map {
+                width: 80%;
+            }
+
+            .map-button {
+                padding: 5px;
+                width: 15px;
+                height: 15px;
+                font-size: 10px;
+            }
+        }
+
+        /* タブレット */
+        @media screen and (min-width: 744px) and (max-width: 1194px) {
+            body {
+                background-color: #ede8db;
+            }
+
+            .map {
+                width: 80%;
+            }
+
+            .map-button {
+                padding: 5px;
+                width: 25px;
+                height: 25px;
+                font-size: 12px;
+            }
+        }
+        .popu1{
+            display: none;
+            position: absolute;
+            top: -10%;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1;
+            background: #545454;
+            padding: 4px 12ox;
+            font-size: 0.9rem;
+            font-weight: 600;
+            line-height: 1.8;
+            animation: fadeIn 0.6s;
+            color: #FFF;
+            border-radius: 3px;
+            filter: drop-shadow(0px 1px 4px #aaa);
+
+        }
+        .gallery {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.clickable-image {
+    margin: 10px;
+    width: 200px;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.clickable-image:hover {
+    transform: scale(1.1);
+}
+
+/* モーダルウィンドウのスタイル */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+    background-color: white;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 600px;
+    display: flex;
+    align-items: center;
+}
+
+.modal-body {
+    display: flex;
+}
+
+#modal-image {
+    width: 200px;
+    height: 150px;
+    margin: auto;
+    margin-right: 20px;
+}
+
+.modal-details {
+    flex: 1;
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    position: absolute;
+    top: 10px;
+    right: 20px;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+    </style>
+    <header>
+        <img src="images/header.png" alt="西濃かるた" class="header">
+    </header>
+</head>
+<body>
+    
+    <div class="map-container">
+        <img src="images/マップ.png" alt="Map" class="map">
+        <button class="map-button map-button1" role="tooltip"
+        style="top: 82.4%; left: 67.6%;" data-popup="popup1">1</button>
+        <a href="https://www.city.kaizu.lg.jp/shisei/0000000571.html" class="popup" id="popup1">かいづっち</a>
+
+        <button class="map-button map-button2" style="top: 62.9%; left: 40.7%;" data-popup="popup2">2</button>
+        <a href="http://www12.plala.or.jp/tamakan/" class="popup" id="popup2"><ruby>関ケ原鍾乳洞<rp>(</rp><rt>せきがはらしょうにゅうどう</rt><rp>)</rp></ruby></a>
+
+        <button class="map-button map-button3" style="top: 56.6%; left: 56.7%;" data-popup="popup3">3</button>
+        <a href="https://www.ikedaonsen.jp/" class="popup" id="popup3"><ruby>池田温泉<rp>(</rp><rt>いけだおんせん</rt><rp>)</rp></ruby></a>
+
+        <button class="map-button map-button2" style="top: 39.1%; left: 58.4%;" data-popup="popup4">4</button>
+        <a href="https://www.nisimino.com/nishimino33reijyou/jouhou/01.html" class="popup" id="popup4"><ruby>横倉寺<rp>(</rp><rt>よこくらじ</rt><rp>)</rp></ruby></a>
+
+        <button class="map-button map-button3" style="top: 63.6%; left: 62.8%;" data-popup="popup5">5</button>
+        <a href="https://www.masukoubou.jp/shop/" class="popup" id="popup5"><ruby>ます<rp>(</rp><rt></rt><rp>)</rp></ruby></a>
+
+        <button class="map-button map-button3" style="top: 94.7%; left: 71.4%;" data-popup="popup6">6</button>
+        <a href="https://numazukanko.jp/spot/10056" class="popup" id="popup6"><ruby>千本松原<rp>(</rp><rt>せんぼんまつばら</rt><rp>)</rp></ruby></a>
+
+        <button class="map-button map-button3" style="top: 72.1%; left: 56.3%;" data-popup="popup7">7</button>
+        <a href="https://yoroyama.jimdofree.com" class="popup" id="popup7"><ruby>養老<rp>(</rp><rt>ようろう</rt><rp>)</rp>ひょうたん</ruby></a>
+        <button class="map-button map-button2" style="top: 62.4%; left: 54.0%;" data-popup="popup8">8</button>
+        <a href="https://www.tarui-kanko.jp/docs/2024022600039/" class="popup" id="popup8"><ruby>相川<rp>(</rp><rt>あいかわ</rt><rp>)</rp>こいのぼり<rp>(</rp><rt></rt><rp>)</rp>一斉遊泳<rp>(</rp><rt>いっせいゆうえい</rt><rp>)</rp></ruby></a>
+        <button class="map-button map-button3" style="top: 67.6%; left: 73.0%;" data-popup="popup9">9</button>
+        <a href="https://www.hidaasahi.jp/%E9%A3%9F%E3%81%B9%E3%82%8B%E6%96%BD%E8%A8%AD%E4%B8%80%E8%A6%A7/" class="popup" id="popup9"><ruby>よもぎうどん<rp>(</rp><rt></rt><rp>)</rp></ruby></a>
+
+        <button class="map-button map-button2" style="top: 54.8%; left: 62.4%;" data-popup="popup10">10</button>
+        <a href="http://hiyoshi-jinjya.jp/" class="popup" id="popup10"><ruby>日吉神社<rp>(</rp><rt>ひよしじんじゃ</rt><rp>)</rp></ruby></a>
+
+        <button class="map-button map-button1" style="top: 52.8%; left: 65.4%;" data-popup="popup11">11</button>
+        <a href="https://www.town-ono.jp/0000000400.html" class="popup" id="popup11"><ruby>大野町<rp>(</rp><rt>おおのちょう</rt><rp>)</rp>バラ<rp>(</rp><rt></rt><rp>)</rp>公園<rp>(</rp><rt>こうえん</rt><rp>)</rp></ruby></a>
+
+        <button class="map-button map-button3" style="top: 50.5%; left: 46.9%;" data-popup="popup12">12</button>
+        <a href="https://www.town.gifu-ikeda.lg.jp/kankou/0000001432.html" class="popup" id="popup12"><ruby>天空<rp>(</rp><rt>てんくう</rt><rp>)</rp>の<rp>(</rp><rt></rt><rp>)</rp>茶畑<rp>(</rp><rt>ちゃばたけ</rt><rp>)</rp></ruby></a>
+
+        <button class="map-button map-button1" style="top: 63.7%; left: 65.6%;" data-popup="popup13">13</button>
+        <a href="https://www.city.ogaki.lg.jp/0000019272.html" class="popup" id="popup13"><ruby>おがっきい<rp>(</rp><rt></rt><rp>)</rp></ruby></a>
+
+        <button class="map-button map-button2" style="top: 66.1%; left: 64.5%;" data-popup="popup14">14</button>
+        <a href="http://www.basho-ogaki.jp/hosomiti/about/" class="popup" id="popup14"><ruby>奥<rp>(</rp><rt>おく</rt><rp>)</rp>の<rp>(</rp><rt></rt><rp>)</rp>細道<rp>(</rp><rt>ほそみち</rt><rp>)</rp></ruby></a>
+
+        <button class="map-button map-button1" style="top: 63.2%; left: 72.5%;" data-popup="popup15">15</button>
+        <a href="https://www.city.ogaki.lg.jp/0000000723.html" class="popup" id="popup15"><ruby>墨俣一夜城<rp>(</rp><rt>すのまたいちやじょう</rt><rp>)</rp></ruby></a>
+
+        <button class="map-button map-button2" style="top: 74.6%; left: 54.4%;" data-popup="popup16">16</button>
+        <a href="https://www.yoro-park.com/facility-map/yoro-falls/" class="popup" id="popup16"><ruby>養老<rp>(</rp><rt>ようろう</rt><rp>)</rp>の<rp>(</rp><rt></rt><rp>)</rp>滝<rp>(</rp><rt>たき</rt><rp>)</rp></ruby></a>
+
+        <button class="map-button map-button2" style="top: 55.7%; left: 38.8%;" data-popup="popup17">17</button>
+        <a href="https://www.city.ogaki.lg.jp/0000002398.html" class="popup" id="popup17"><ruby>伊吹<rp>(</rp><rt>いぶき</rt><rp>)</rp>おろし</ruby></a>
+
+        <button class="map-button map-button1" style="top: 64.3%; left: 51.9%;" data-popup="popup18">18</button>
+        <a href="https://www.nangu-san.com/" class="popup" id="popup18"><ruby>南宮大社<rp>(</rp><rt>なんぐうたいしゃ</rt><rp>)</rp></ruby></a>
+
+        <button class="map-button map-button1" style="top: 67.4%; left: 70.1%;" data-popup="popup19">19</button>
+        <a href="https://www.town.anpachi.lg.jp/0000000432.html" class="popup" id="popup19"><ruby>中洲川千本桜<rp>(</rp><rt>なかすがわせんぼんざくら</rt><rp>)</rp></ruby></a>
+
+        <button class="map-button map-button3" style="top: 92.1%; left: 70.6%;" data-popup="popup20">20</button>
+        <a href="https://www.kisosansenkoen.jp/" class="popup" id="popup20"><ruby>木曾三川公園<rp>(</rp><rt>きそさんせんこうえん</rt><rp>)</rp></ruby></a>
+
+        <button class="map-button map-button1" style="top: 79.4%; left: 67.4%;" data-popup="popup21">21</button>
+        <a href="https://www.city.kaizu.lg.jp/kanko/0000000326.html" class="popup" id="popup21"><ruby>千代穂稲荷神社<rp>(</rp><rt>ちよほいなりじんじゃ</rt><rp>)</rp></ruby></a>
+
+        <button class="map-button map-button2" style="top: 74.5%; left: 57.5%;" data-popup="popup22">22</button>
+        <a href="https://www.yoro-park.com/facility-map/hantenchi/" class="popup" id="popup22"><ruby>養老天命反転地<rp>(</rp><rt>ようろうてんめんはんてんち</rt><rp>)</rp></ruby></a>
+
+        <button class="map-button map-button1" style="top: 54.1%; left: 56.8%;" data-popup="popup23">23</button>
+        <a href="https://www.town.gifu-ikeda.lg.jp/kankou/0000000178.html" class="popup" id="popup23"><ruby>霞間ヶ渓<rp>(</rp><rt>かまがたに</rt><rp>)</rp></ruby></a>
+
+        <button class="map-button map-button2" style="top: 63.7%; left: 45.9%;" data-popup="popup24">24</button>
+        <a href="https://sekigahara.pref.gifu.lg.jp/" class="popup" id="popup24"><ruby>岐阜関ケ原古城記念館<rp>(</rp><rt>ぎふせきがはらこじょうきねんかん</rt><rp>)</rp></ruby></a>
+
+        <button class="map-button map-button1" style="top: 69.6%; left: 68.7%;" data-popup="popup25">25</button>
+        <a href="https://www.town.anpachi.lg.jp/0000000376.html" class="popup" id="popup25"><ruby>安八百梅園<rp>(</rp><rt>あんぱちひゃくばいえん</rt><rp>)</rp></ruby></a>
+
+        <button class="map-button map-button3" style="top: 38.0%; left: 39.0%;" data-popup="popup26">26</button>
+        <a href="https://www.town.ibigawa.lg.jp/kankoujyouhou/0000006122.html" class="popup" id="popup26"><ruby>白龍<rp>(</rp><rt>はくりゅう</rt><rp>)</rp>の<rp>(</rp><rt></rt><rp>)</rp>湯<rp>(</rp><rt>ゆ</rt><rp>)</rp></ruby></a>
+
+        <button class="map-button map-button3" style="top: 28.23%; left: 36.04%;" data-popup="popup27">27</button>
+        <a href="https://yashaikenosato.com/" class="popup" id="popup27"><ruby>夜叉ヶ池ヶ<rp>(</rp><rt>やしゃがいけ</rt><rp>)</rp>の<rp>(</rp><rt></rt><rp>)</rp>里<rp>(</rp><rt>さと</rt><rp>)</rp></ruby>さかうち</a>
+
+        <button class="map-button map-button2" style="top: 23.5%; left: 49.2%;" data-popup="popup28">28</button>
+        <a href="https://www.town.ibigawa.lg.jp/kankoujyouhou/0000006121.html" class="popup" id="popup28"><ruby>徳山<rp>(</rp><rt>とくやま</rt><rp>)</rp>ダム</ruby></a>
+
+        <button class="map-button map-button2" style="top: 81.8%; left: 39.01%;" data-popup="popup29">29</button>
+        <a href="https://www.city.ogaki.lg.jp/ongaku/0000022901.html" class="popup" id="popup29"><ruby>水嶺湖<rp>(</rp><rt>すいれいこ</rt><rp>)</rp></ruby></a>
+
+        <button class="map-button map-button3" style="top: 72.2%; left: 45.7%;" data-popup="popup30">30</button>
+        <a href="https://www.city.ogaki.lg.jp/0000012678.html" class="popup" id="popup30"><ruby>多良峡森林公園<rp>(</rp><rt>たらきょうしんりんこうえん</rt><rp>)</rp></ruby></a>
+
+        <button class="map-button map-button2" style="top: 26.23%; left: 46.2%;" data-popup="popup31">31</button>
+        <a href="https://www.town.ibigawa.lg.jp/kankoujyouhou/0000009579.html" class="popup" id="popup31"><ruby>藤橋城<rp>(</rp><rt>ふじはしじょう</rt><rp>)</rp>・<rp>(</rp><rt></rt><rp>)</rp>西美濃<rp>(</rp><rt>にしみの</rt><rp>)</rp></ruby>プラネタリウム</a>
+
+        <button class="map-button map-button3" style="top: 79.3%; left: 42.0%;" data-popup="popup32">32</button>
+        <a href="https://www.kamiishizu-midorinomura-park.com/" class="popup" id="popup32"><ruby>緑<rp>(</rp><rt>みどり</rt><rp>)</rp>の<rp>(</rp><rt></rt><rp>)</rp>村公園<rp>(</rp><rt>むらこうえん</rt><rp>)</rp></ruby></a>
+    </div>
+
+
+    <div class="gallery">
+        <img src="images/image1.png" alt="Location 111" class="clickable-image" data-title="かいづっち" data-description="いつも明るく、元気いっぱい！<br>おちょぼさんの油あげが大好きだよ！<a href='https://www.city.kaizu.lg.jp/shisei/0000000571.html'><br>くわしくはこちら！</a>">
+        <img src="images/image2.png" alt="Location 2" class="clickable-image" data-title="関ヶ原鍾乳洞" data-description="わき水にはニジマスが泳いでいて、化石もたくさんあるよ！<a href='http://www12.plala.or.jp/tamakan/'><br>くわしくはこちら！</a>">
+        <img src="images/image3.png" alt="Location 2" class="clickable-image" data-title="池田温泉" data-description="温泉に入れば肌がつるつる！<br>体にやさしい温泉だよ！<a href='https://www.ikedaonsen.jp/'><br>くわしくはこちら！</a>">
+        <img src="images/image4.png" alt="Location 2" class="clickable-image" data-title="横倉寺" data-description="たくさんの宝箱が置いてあることから「美濃の正倉院」と言われているよ！<a href='https://www.nisimino.com/nishimino33reijyou/jouhou/01.html'><br>くわしくはこちら！</a>">
+        <img src="images/image5.png" alt="Location 2" class="clickable-image" data-title="ます" data-description="全国にある約8割は大垣の「ます」だよ！<a href='https://www.masukoubou.jp/shop/'><br>くわしくはこちら！</a>">
+        <img src="images/image6.png" alt="Location 2" class="clickable-image" data-title="千本松原" data-description="洪水から町を守る工事の完成を記念して1000本の日向松が植えられたよ！<a href='https://numazukanko.jp/spot/10056'><br>くわしくはこちら！</a>">
+        <img src="images/image7.png" alt="Location 2" class="clickable-image" data-title="養老ひょうたん" data-description="養老町では可愛らしいランプを家族みんなで作れるよ！<a href='https://yoroyama.jimdofree.com'><br>くわしくはこちら！</a>">
+        <img src="images/image8.png" alt="Location 2" class="clickable-image" data-title="相川こいのぼり一斉遊泳" data-description="300匹以上のこいのぼりが空を泳ぐよ！<a href='https://www.tarui-kanko.jp/docs/2024022600039/'><br>くわしくはこちら！</a>">
+        <img src="images/image9.png" alt="Location 2" class="clickable-image" data-title="よもぎうどん" data-description="他にもほうれん草や梅を使ったうどんもあるよ！<a href='https://www.hidaasahi.jp/%E9%A3%9F%E3%81%B9%E3%82%8B%E6%96%BD%E8%A8%AD%E4%B8%80%E8%A6%A7/'><br>くわしくはこちら！</a>">
+        <img src="images/image10.png" alt="Location 2" class="clickable-image" data-title="日吉神社" data-description="えん結びや子授けといった家族に関係するご利益があるよ！<a href='http://hiyoshi-jinjya.jp/'><br>くわしくはこちら！</a>">
+        <img src="images/image11.png" alt="Location 2" class="clickable-image" data-title="大野町バラ公園" data-description="5月にバラまつりが開催されてスタンプラリーやバラ大福が楽しめるよ！<a href='https://www.town-ono.jp/0000000400.html'><br>くわしくはこちら！</a>">
+        <img src="images/image12.png" alt="Location 2" class="clickable-image" data-title="天空の茶畑" data-description="絶景で「岐阜のマチュピチュ」とも言われているよ！<a href='https://www.town.gifu-ikeda.lg.jp/kankou/0000001432.html'><br>くわしくはこちら！</a>">
+        <img src="images/image13.png" alt="Location 2" class="clickable-image" data-title="おがっきぃ" data-description="大垣市のマスコットキャラ！<br>おがっきぃがよんだ一句が毎週更新されているよ！<a href='https://www.city.ogaki.lg.jp/0000019272.html'><br>くわしくはこちら！</a>">
+        <img src="images/image14.png" alt="Location 2" class="clickable-image" data-title="奥の細道" data-description="松尾芭蕉が約2000km、約150日間も全国を歩いて書きあげたよ！<a href='http://www.basho-ogaki.jp/hosomiti/about/'><br>くわしくはこちら！</a>">
+        <img src="images/image15.png" alt="Location 2" class="clickable-image" data-title="墨俣一夜城" data-description="一夜にして建てられたと言われているよ！<a href='https://www.city.ogaki.lg.jp/0000000723.html'><br>くわしくはこちら！</a>">
+        <img src="images/image16.png" alt="Location 2" class="clickable-image" data-title="養老の滝" data-description="10月上旬から11月下旬にかけ、イベントもやっていて紅葉がとてもきれいだよ！<a href='https://www.yoro-park.com/facility-map/yoro-falls/'><br>くわしくはこちら！</a>">
+        <img src="images/image17.png" alt="Location 2" class="clickable-image" data-title="伊吹おろし" data-description="伊吹おろしを利用して岐阜県では甘い干し柿が作られたよ！<a href='https://www.city.ogaki.lg.jp/0000002398.html'><br>くわしくはこちら！</a>">
+        <img src="images/image18.png" alt="Location 2" class="clickable-image" data-title="南宮大社" data-description="鉄鋼にまつわる神をお祀りしていて、あざやかな朱ぬりが特徴的だよ！<a href='https://www.nangu-san.com/'><br>くわしくはこちら！</a>">
+        <img src="images/image19.png" alt="Location 2" class="clickable-image" data-title="中洲川千本桜" data-description="約1000本の桜が両岸に植えられていて、祭りのときは花火が打ち上げられるよ！<a href='https://www.town.anpachi.lg.jp/0000000432.html'><br>くわしくはこちら！</a>">
+        <img src="images/image20.png" alt="Location 2" class="clickable-image" data-title="木曾三川公園" data-description="タワーからは揖斐川、木曽川、長良川が見え、季節ごとにイベントもやっているよ！<a href='https://www.kisosansenkoen.jp/'><br>くわしくはこちら！</a>">
+        <img src="images/image21.png" alt="Location 2" class="clickable-image" data-title="千代保稲荷神社" data-description="三角形の油あげは稲荷大神の使いであるきつねへのお供え物だよ！<a href='https://www.city.kaizu.lg.jp/kanko/0000000326.html'><br>くわしくはこちら！</a>">
+        <img src="images/image22.png" alt="Location 2" class="clickable-image" data-title="養老天命反転地" data-description="バランス感覚や遠近感を混乱させる仕掛けがたくさん！家族で一緒に行こう！<a href='https://www.yoro-park.com/facility-map/hantenchi/'><br>くわしくはこちら！</a>">
+        <img src="images/image23.png" alt="Location 2" class="clickable-image" data-title="霞間ヶ渓" data-description="桜いがいにもあじさいなど四季折々の景色が楽しめるよ！<a href='https://www.town.gifu-ikeda.lg.jp/kankou/0000000178.html'><br>くわしくはこちら！</a>">
+        <img src="images/image24.png" alt="Location 2" class="clickable-image" data-title="岐阜関ヶ原古戦場記念館" data-description="リニューアルされてきれいだよ！<br>「関ヶ原メモリアル」と言われ、親しまれているよ！<a href='https://sekigahara.pref.gifu.lg.jp/'><br>くわしくはこちら！</a>">
+        <img src="images/image25.png" alt="Location 2" class="clickable-image" data-title="安八百梅園" data-description="どの時期に行っても色々な梅を楽しむことができるよ！<a href='https://www.town.anpachi.lg.jp/0000000376.html'><br>くわしくはこちら！</a>">
+        <img src="images/image26.png" alt="Location 2" class="clickable-image" data-title="白龍の湯" data-description="周りに川や木がたくさんあってリラックスできるよ！<a href='https://www.town.ibigawa.lg.jp/kankoujyouhou/0000006122.html'><br>くわしくはこちら！</a>">
+        <img src="images/image27.png" alt="Location 2" class="clickable-image" data-title="夜叉ヶ池の里さかうち" data-description="その他にも鹿カレーや鹿ハンバーグも食べられるよ！<a href='https://yashaikenosato.com/'><br>くわしくはこちら！</a>">
+        <img src="images/image28.png" alt="Location 2" class="clickable-image" data-title="徳山ダム" data-description="ダムの水は愛知県と岐阜県で使われているよ！<a href='https://www.town.ibigawa.lg.jp/kankoujyouhou/0000006121.html'><br>くわしくはこちら！</a>">
+        <img src="images/image29.png" alt="Location 2" class="clickable-image" data-title="水嶺湖" data-description="自然豊かで秋にはカナディアンカヌーが楽しめるよ！<a href='https://www.city.ogaki.lg.jp/ongaku/0000022901.html'><br>くわしくはこちら！</a>">
+        <img src="images/image30.png" alt="Location 2" class="clickable-image" data-title="太良峡森林公園" data-description="吊橋からの眺めは絶景だよ！多良峡は上石津の中心に位置しているよ！<a href='https://www.city.ogaki.lg.jp/0000012678.html'><br>くわしくはこちら！</a>">
+        <img src="images/image31.png" alt="Location 2" class="clickable-image" data-title="藤橋城・西美濃プラネタリウム" data-description="星や宇宙に関する資料、郷土資料などが展示されているよ！<a href='https://www.town.ibigawa.lg.jp/kankoujyouhou/0000009579.html'><br>くわしくはこちら！</a>">
+        <img src="images/image32.png" alt="Location 2" class="clickable-image" data-title="緑の村公園" data-description="他にも陶芸やピザ作りを楽しめるよ！<a href='https://www.kamiishizu-midorinomura-park.com/'><br>くわしくはこちら！</a>">
+
+        <!-- 追加の画像も同様に配置 -->
+    </div>
+
+    <!-- モーダルウィンドウ -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div class="modal-body">
+                <img id="modal-image" src="" alt="Image">
+                <div class="modal-details">
+                    <h2 id="modal-title"></h2>
+                    <p id="modal-description"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="tooltip" class="tooltip"></div>
+
+    <script>
+       document.addEventListener('DOMContentLoaded', function () {
+    const buttons = document.querySelectorAll('.map-button');
+
+    buttons.forEach(button => {
+        button.addEventListener('click', function (event) {
+            // 他のポップアップをすべて非表示にする
+            document.querySelectorAll('.popup').forEach(popup => {
+                popup.style.display = 'none';
+            });
+
+            // 対応するポップアップを表示/非表示にする
+            const popupId = button.getAttribute('data-popup');
+            const popup = document.getElementById(popupId);
+            if (popup.style.display === 'none' || popup.style.display === '') {
+                // ポップアップの位置を動的に設定
+                const rect = button.getBoundingClientRect();
+                const popupHeight = popup.offsetHeight;
+                const popupWidth = popup.offsetWidth;
+                const scrollY = window.scrollY; // スクロール位置を考慮する
+                let top = rect.top + scrollY - popupHeight - -10; // ここで調整 (例: 10pxから20pxに変更)
+                let left = rect.left + (button.offsetWidth / 2) - (popupWidth / 2);
+
+                // 画面外に出ないように調整
+                if (top < 0) top = rect.top + scrollY + button.offsetHeight + 10;
+                if (left < 0) left = 10;
+                if (left + popupWidth > window.innerWidth) left = window.innerWidth - popupWidth - 10;
+
+                // スマホサイズに対応するため、ポップアップが画面外に出ないようにする
+                if (window.innerWidth <= 550) {
+                    // スクロールを考慮して位置調整
+                    const screenHeight = window.innerHeight;
+                    const screenWidth = window.innerWidth;
+                    const popupBottom = top + popupHeight;
+                    const popupRight = left + popupWidth;
+
+                    if (popupBottom > scrollY + screenHeight) {
+                        top = rect.top + scrollY + button.offsetHeight + 10;
+                    }
+                    if (popupRight > screenWidth) {
+                        left = screenWidth - popupWidth - 10;
+                    }
+                }
+
+                popup.style.top = `${top}px`;
+                popup.style.left = `${left}px`;
+                popup.style.display = 'block';
+            } else {
+                popup.style.display = 'none';
+            }
+
+            // イベントのバブルアップを防ぐ
+            event.stopPropagation();
+        });
+    });
+
+    // クリックイベントがピン以外の場所で発生した場合、すべてのポップアップを閉じる
+    document.addEventListener('click', function () {
+        document.querySelectorAll('.popup').forEach(popup => {
+            popup.style.display = 'none';
+        });
+    });
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    const images = document.querySelectorAll('.clickable-image');
+    const modal = document.getElementById('modal');
+    const modalImage = document.getElementById('modal-image');
+    const modalTitle = document.getElementById('modal-title');
+    const modalDescription = document.getElementById('modal-description');
+    const closeBtn = document.querySelector('.close');
+    const tooltip = document.getElementById('tooltip');
+
+    images.forEach(image => {
+        image.addEventListener('click', function(event) {
+            const imgSrc = image.src;
+            const title = image.getAttribute('data-title');
+            const description = image.getAttribute('data-description');
+
+            modalImage.src = imgSrc;
+            modalTitle.textContent = title;
+            modalDescription.innerHTML = description;
+            modal.style.display = 'block';
+
+            const rect = image.getBoundingClientRect();
+            tooltip.innerHTML = `<strong>${title}:</strong> ${description}`;
+            tooltip.style.display = 'block';
+            tooltip.style.left = `${rect.left + window.scrollX}px`;
+            tooltip.style.top = `${rect.top + window.scrollY - tooltip.offsetHeight}px`;
+        });
+    });
+
+    closeBtn.addEventListener('click', function() {
+        modal.style.display = 'none';
+        tooltip.style.display = 'none';
+    });
+
+    window.addEventListener('click', function(event) {
+        if (event.target === modal) {
+            modal.style.display = 'none';
+            tooltip.style.display = 'none';
+        }
+    });
+});
+    </script>
+</body>
+</html>
